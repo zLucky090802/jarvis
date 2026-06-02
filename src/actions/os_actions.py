@@ -1,32 +1,37 @@
 import subprocess
 import os
 
-APPS_COMMANDS = {
-    "chrome": "start chrome",
-    "edge": "start msedge",
-    "spotify": "start spotify:",
-    "whatsapp": "start whatsapp:",
-    "calculadora": "start calc",
-    "notero": "start notepad",
-    "code": "start code"
+STORE_APPS = ["whatsapp", "spotify", "netflix", "instagram", "facebook", "xbox", 'discord']
+ALIASES = {
+    "wsp": "whatsapp",
+    "musica": "spotify",
+    "editor": "code",
+    "bloc de notas": "notepad",
+    "calculadora": "calc"
 }
 
-
 def open_application (app_name: str):
-    """Intenta abrir una aplicacion usando comandos nativos de windows"""
+    """Automatiza por completo el comando 'start'. Detecta si la app requiere
+    el formato de la Microsoft Store (con ':') o si es un comando directo."""
     
-    app_name = app_name.lower().strip()
+    target = app_name.lower().strip()
+    target = ALIASES.get(target, target)
     
-    if app_name in APPS_COMMANDS:
-        command = APPS_COMMANDS[app_name]
-        try:
-            subprocess.run(command, shell=True, check=True)
-            return True
-        except subprocess.CalledProcessError:
-            print(f'Error: no se pudo ejecutar el comando para {app_name}')
-            return False
-    
+    if target in STORE_APPS:
+        windows_command = f'{target}:'
+        
     else:
-        print(f'la aplicacion {app_name} no esta registrada en el assitente.')
+        windows_command = target
+        
+    final_command = f' start {windows_command}'
+
+    try:
+        subprocess.run(final_command, shell=True, check=True)
+        print(f'jarvios: abriendo {target.capitalize()}')
+        return True
+    except subprocess.CalledProcessError:
+        print(f'jarvis: no encontre ninguna app o comando llamado {windows_command}')
         return False
+    
+
     
