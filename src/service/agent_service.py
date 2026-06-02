@@ -27,4 +27,3 @@ def setting_agent():
     
     return agent, context
     
- 
