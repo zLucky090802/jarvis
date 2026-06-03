@@ -17,21 +17,19 @@ def open_application (app_name: str):
     target = app_name.lower().strip()
     target = ALIASES.get(target, target)
     
-    if target in STORE_APPS:
-        windows_command = f'{target}:'
-        
-    else:
-        windows_command = target
-        
-    final_command = f' start {windows_command}'
+  
 
     try:
-        subprocess.run(final_command, shell=True, check=True)
+        subprocess.run(f'start {target}', shell=True, check=True)
         print(f'jarvios: abriendo {target.capitalize()}')
         return True
     except subprocess.CalledProcessError:
-        print(f'jarvis: no encontre ninguna app o comando llamado {windows_command}')
-        return False
+        try:
+            subprocess.run(f'start {target}:', shell=True, check=True)
+            return True
+        except subprocess.CalledProcessError:
+            print(f"Error: No encontré ninguna aplicación o comando llamado '{target}' en el sistema.")
+            return False
     
 
     

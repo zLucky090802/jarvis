@@ -10,17 +10,23 @@ from llama_index.llms.groq import Groq
 from src.actions.os_actions import open_application
 from llama_index.core.workflow import Context
 
-api_key_groq = os.getenv('GROQ_API_KEY')
-llm = Groq(
-    model='llama-3.1-8b-instant',
-    api_key=api_key_groq
-)
 
-def setting_agent():
+
+def setting_agent(llm):
     agent = FunctionAgent(
         llm=llm,
         tools=[open_application],
-        allow_parallel_tool_calls= True
+        allow_parallel_tool_calls= True,
+        system_prompt=(
+            "Eres Jarvis, un asistente virtual avanzado para Windows. Tu objetivo es abrir aplicaciones usando la herramienta 'open_application'.\n\n"
+            "CRÍTICO - REGLA DE FORMATO PARA WINDOWS:\n"
+            "Antes de llamar a la herramienta, analiza qué tipo de aplicación pide el usuario:\n"
+            "1. Si es una aplicación moderna, de la Microsoft Store o de redes sociales (como Discord, Spotify, WhatsApp, Netflix, Instagram, Facebook), "
+            "DEBES agregar obligatoriamente dos puntos (:) al final del nombre (ejemplo: 'discord:', 'spotify:', 'whatsapp:').\n"
+            "2. Si es una herramienta nativa del sistema o un comando clásico ejecutable (como notepad, calc, mspaint, explorer, code), "
+            "DEBES enviar el nombre limpio, SIN los dos puntos.\n\n"
+            "Piensa cuidadosamente a qué categoría pertenece la aplicación solicitada antes de invocar la herramienta."
+        )
     )
     
     context = Context(agent)

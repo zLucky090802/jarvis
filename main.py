@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 import os
-
+import asyncio
 from llama_index.core import Settings
 from llama_index.llms.groq import Groq
 from llama_index.core.agent.workflow import (
@@ -9,6 +9,7 @@ from llama_index.core.agent.workflow import (
     ToolCallResult,
     FunctionAgent
 )
+from src.service.agent_service import setting_agent
 
 load_dotenv()
 
@@ -22,11 +23,19 @@ Settings.llm = llm
 
 
 
-def main():
+async def main():
     
     
-    print("Hello from jarvis!")
+   agent, context =  setting_agent(llm)
+
+   response = await agent.run(
+       'open spotify',
+       ctx=context,
+    )
+   
+   print(response)
 
 
 if __name__ == "__main__":
-    main()
+    import asyncio
+    asyncio.run(main()) 
