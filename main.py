@@ -12,7 +12,7 @@ from llama_index.core.agent.workflow import (
 from src.service.agent_service import setting_agent
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.routes
+from src.routes.jarvis_routes import router
 
 load_dotenv()
 app = FastAPI(title='Jarvis')
