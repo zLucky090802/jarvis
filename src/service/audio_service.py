@@ -14,7 +14,7 @@ class AudioService:
         """Valida, guarda temporalmente y transcribe un archivo de audio usando Groq Whisper.
         Retorna el texto extraído."""
         
-        if not file.filename.lower.endswith(self.allowed_extensions):
+        if not file.filename.lower().endswith(self.allowed_extensions):
             raise HTTPException(status_code=400, detail='Formato de audio no soportado')
         
         temp_file_path = f'temp_{file.filename}'

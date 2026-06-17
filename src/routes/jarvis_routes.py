@@ -9,7 +9,7 @@ agent_service = AgentService()
 
 @router.post('/upload')
 async def upload_file(file: UploadFile = File(...)):
-    text_prompt = await audio_service(file)
+    text_prompt = await audio_service.transcript_audio(file)
     print(f'Jarvis escucho; {text_prompt}')
     
     agent_response = await agent_service.execute_command(text_prompt)

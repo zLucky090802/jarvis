@@ -1,52 +1,43 @@
-from dotenv import load_dotenv
 import os
-import asyncio
-from llama_index.core import Settings
-from llama_index.llms.groq import Groq
-from llama_index.core.agent.workflow import (
-    ReActAgent,
-    AgentStream,
-    ToolCallResult,
-    FunctionAgent
-)
-from src.service.agent_service import setting_agent
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from src.routes.jarvis_routes import router
+from dotenv import load_dotenv
 
 load_dotenv()
-app = FastAPI(title='Jarvis')
+
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from llama_index.core import Settings
+from llama_index.llms.groq import Groq
+from src.routes.jarvis_routes import router
+
+# 1. Cargar variables de entorno
+
+
+# 2. Configuración global de LlamaIndex (Para que todo el backend use Groq por defecto)
 api_key_groq = os.getenv('GROQ_API_KEY')
 llm = Groq(
     model='llama-3.1-8b-instant',
     api_key=api_key_groq
 )
-
 Settings.llm = llm
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins = ['*'],
-    allow_credentials=True,
-    allow_methods=["*"], # Permite POST, GET, OPTIONS, etc.
-    allow_headers=["*"], # Permite Content-Type, Authorization, etc.
+# 3. Inicializar la aplicación de FastAPI
+app = FastAPI(
+    title='Jarvis API',
+    description='Backend modular para el asistente virtual Jarvis utilizando LlamaIndex Workflows y Groq',
+    version='1.0.0'
 )
 
+# 4. Configurar Middleware de CORS (Esencial para conectar con tu Frontend/Script cliente)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],  # En producción, cámbialo por el dominio de tu interfaz
+    allow_credentials=True,
+    allow_methods=["*"], 
+    allow_headers=["*"], 
+)
 
+# 5. Incluir las rutas de Jarvis
+app.include_router(router)
 
-async def main():
-    
-    
-   agent, context =  setting_agent(llm)
-
-   response = await agent.run(
-       'open spotify',
-       ctx=context,
-    )
-   
-   print(response)
-
-
-if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main()) 
+# Nota: Eliminamos por completo async def main() porque Uvicorn se encarga de la ejecución.
