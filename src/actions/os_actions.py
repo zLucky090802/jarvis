@@ -7,7 +7,9 @@ ALIASES = {
     "musica": "spotify",
     "editor": "code",
     "bloc de notas": "notepad",
-    "calculadora": "calc"
+    "calculadora": "calc",
+    "google": "chrome",  #  Añade esto
+    "chrome": "chrome"   #  Añade esto
 }
 
 def open_application (app_name: str):
