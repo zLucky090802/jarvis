@@ -8,6 +8,7 @@ import os
 from llama_index.core import Settings
 from llama_index.llms.groq import Groq
 from src.actions.os_actions import open_application
+from src.actions.web_actions import search_in_browser
 from llama_index.core.workflow import Context
 
 
@@ -20,7 +21,10 @@ class AgentService:
          
          self.agent = FunctionAgent(
             llm=self.llm,
-            tools=[open_application],
+            tools=[
+                open_application,
+                search_in_browser
+            ],
             allow_parallel_tool_calls=True,
             system_prompt=(
                 "Eres Jarvis, un asistente virtual avanzado para Windows. Tu objetivo es abrir aplicaciones usando la herramienta 'open_application'.\n\n"
