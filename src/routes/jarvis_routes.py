@@ -5,7 +5,7 @@ from src.service.agent_service import AgentService
 router = APIRouter()
 
 audio_service = AudioService()
-agent_service = 
+agent_service = AgentService()
 
 @router.post('/upload')
 async def upload_file(file: UploadFile = File(...)):
