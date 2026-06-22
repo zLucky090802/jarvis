@@ -1,61 +1,89 @@
 import sounddevice as sd
 from scipy.io import wavfile
+import numpy as np
 import httpx
 import os
 import time
 
-# Configuración de la grabación
-FREQ = 44100  # Frecuencia de muestreo estándar (CD quality)
-DURACION = 4   # Segundos que se quedará escuchando tu micrófono
+FREQ = 44100
 OUTPUT_FILE = "prueba_micro.wav"
 API_URL = "http://127.0.0.1:8000/upload"
 
-def registrar_voz():
-    print(f"\n🎙️ [Micrófono Activo] Tienes {DURACION} segundos... ¡HABLA AHORA!")
-    print("--------------------------------------------------")
-    
-    # Captura el audio del micrófono de Windows
-    audio_data = sd.rec(int(DURACION * FREQ), samplerate=FREQ, channels=1, dtype='int16')
-    
-    # Barra de progreso visual en consola
-    for i in range(DURACION, 0, -1):
-        print(f"⏱️ Grabando... quedan {i} segundos")
+# --- Calibra estos valores ---
+UMBRAL_VOZ = 800
+SEGUNDOS_PARA_ACTIVAR = 0.5
+DURACION_COMANDO = 4
+TOLERANCIA_SILENCIO = 2
+# -----------------------------
+
+def obtener_rms(audio_chunk) -> float:
+    return np.sqrt(np.mean(audio_chunk.astype(np.float32) ** 2))
+
+def esperar_voz_humana() -> bool:
+    CHUNK = int(FREQ * 0.1)
+    chunks_con_voz = 0
+    chunks_silencio = 0
+    chunks_necesarios = int(SEGUNDOS_PARA_ACTIVAR / 0.1)
+
+    print("👂 Esperando voz... (habla para activar Jarvis)")
+
+    while True:
+        chunk = sd.rec(CHUNK, samplerate=FREQ, channels=1, dtype='int16')
+        sd.wait()
+        rms = obtener_rms(chunk)
+
+        if rms > UMBRAL_VOZ:
+            chunks_con_voz += 1
+            chunks_silencio = 0
+            print(f"🗣️ Voz detectada ({chunks_con_voz}/{chunks_necesarios}) RMS: {rms:.0f}")
+            if chunks_con_voz >= chunks_necesarios:
+                return True
+        else:
+            chunks_silencio += 1
+            if chunks_silencio > TOLERANCIA_SILENCIO:
+                if chunks_con_voz > 0:
+                    print("🔇 Reseteando...")
+                chunks_con_voz = 0
+                chunks_silencio = 0
+
+def registrar_comando() -> np.ndarray:
+    print(f"🎙️ ¡Habla! Grabando {DURACION_COMANDO} segundos...")
+    audio = sd.rec(int(DURACION_COMANDO * FREQ), samplerate=FREQ, channels=1, dtype='int16')
+    for i in range(DURACION_COMANDO, 0, -1):
+        print(f"⏱️ {i}s...")
         time.sleep(1)
-        
-    sd.wait()  # Espera a que termine la grabación física por completo
+    sd.wait()
     print("🛑 Grabación finalizada.")
-    
-    # Guarda el archivo en tu disco duro
+    return audio
+
+def enviar_al_backend(audio_data: np.ndarray):
     wavfile.write(OUTPUT_FILE, FREQ, audio_data)
+    print("🚀 Enviando comando a Jarvis...")
 
-def enviar_al_backend():
-    print(f"🚀 Enviando '{OUTPUT_FILE}' al servidor local...")
-    
-    if not os.path.exists(OUTPUT_FILE):
-        print("❌ Error: No se encontró el archivo de audio grabado.")
-        return
-
-    # Enviamos el archivo simulando un formulario multipart/form-data
     with open(OUTPUT_FILE, "rb") as f:
         files = {"file": (OUTPUT_FILE, f, "audio/wav")}
         try:
-            # Ponemos un timeout largo (60s) por si Groq o LlamaIndex tardan un poco en responder
             response = httpx.post(API_URL, files=files, timeout=60.0)
-            
             if response.status_code == 200:
-                print("\n✨ --- RESPUESTA DE JARVIS --- ✨")
-                print(response.json())
+                result = response.json()
+                print(f"\n✨ Jarvis: {result.get('agent_response')}")
             else:
-                print(f"❌ Error en el servidor ({response.status_code}): {response.text}")
-                
+                print(f"❌ Error ({response.status_code}): {response.text}")
         except httpx.ConnectError:
-            print("❌ Error: No se pudo conectar con el backend. ¿Olvidaste encender FastAPI?")
-            
-    # Limpieza local
+            print("❌ Backend no disponible.")
+            time.sleep(3)
+
     if os.path.exists(OUTPUT_FILE):
         os.remove(OUTPUT_FILE)
 
 if __name__ == "__main__":
-    registrar_voz()
-    enviar_al_backend()
-    
+    print("🤖 Jarvis listo. CTRL+C para salir.")
+    print(f"📊 Umbral de voz configurado en: {UMBRAL_VOZ} RMS\n")
+    try:
+        while True:
+            esperar_voz_humana()
+            audio = registrar_comando()
+            enviar_al_backend(audio)
+            print("\n🔄 Listo para el siguiente comando...\n")
+    except KeyboardInterrupt:
+        print("\n👋 Jarvis apagado.")
