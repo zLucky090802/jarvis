@@ -68,5 +68,20 @@ class MondayService:
         }
         """
         data = await self._ejecutar_query(query, {"itemId": item_id})
-        if "error" in data: return f"No pude eliminar el elemento. {data['error']}"
-        return f"Elemento con ID {item_id} eliminado correctamente."
+        if "error" in data: return f"An error ocurred while trying to delete the item. {data['error']}"
+        return f"Element with ID {item_id} delete."
+    
+    async def create_board(self, board_name: str, workspace_id: Optional[str] = None) -> str:
+        # Si se pasa workspace_id se convierte a entero, si no, se crea en el principal
+        w_id = int(workspace_id) if workspace_id else None
+        query = """
+        mutation ($boardName: String!, $workspaceId: Int) {
+            create_board (board_name: $boardName, board_kind: public, workspace_id: $workspaceId) {
+                id
+                name
+            }
+        }
+        """
+        data = await self._ejecutar_query(query, {"boardName": board_name, "workspaceId": w_id})
+        if "error" in data: return f"error while trying to create board. {data['error']}"
+        return f"Tablero '{data['create_board']['name']}' create with id: {data['create_board']['id']}."

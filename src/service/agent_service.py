@@ -5,6 +5,7 @@ from functools import wraps
 from src.actions.os_actions import open_application
 from src.actions.web_actions import search_in_browser
 from src.actions.media_actions import play_spotify_song
+from src.actions.monday_actions import monday_tools
 
 class AgentService:
     def __init__(self):
@@ -36,6 +37,7 @@ class AgentService:
                     self._make_once(play_spotify_song, tools_ejecutadas),
                     self._make_once(open_application, tools_ejecutadas),
                     self._make_once(search_in_browser, tools_ejecutadas),
+                    monday_tools,
                 ],
                 allow_parallel_tool_calls=False, 
                 system_prompt=(
