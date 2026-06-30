@@ -5,7 +5,7 @@ from functools import wraps
 from src.actions.os_actions import open_application
 from src.actions.web_actions import search_in_browser
 from src.actions.media_actions import play_spotify_song
-from src.actions.monday_actions import monday_tools
+from src.actions.monday_actions import delete_item_tool, add_item_tool, create_board_tool, create_worskpace_tool
 
 class AgentService:
     def __init__(self):
@@ -32,12 +32,15 @@ class AgentService:
             tools_ejecutadas = set()
             # 🚨 EL ROMPE-BUCLES DEFINITIVO: Instanciamos un agente y contexto limpios CADA VEZ
             agent = FunctionAgent(
-                llm=self.llm,
-                tools = [
+               llm=self.llm,
+                tools=[
                     self._make_once(play_spotify_song, tools_ejecutadas),
                     self._make_once(open_application, tools_ejecutadas),
                     self._make_once(search_in_browser, tools_ejecutadas),
-                    monday_tools,
+                    self._make_once(create_worskpace_tool, tools_ejecutadas),
+                    self._make_once(create_board_tool, tools_ejecutadas),
+                    self._make_once(delete_item_tool, tools_ejecutadas),
+                    self._make_once(add_item_tool, tools_ejecutadas)
                 ],
                 allow_parallel_tool_calls=False, 
                 system_prompt=(
@@ -54,7 +57,8 @@ class AgentService:
                     "⚠️ REGLA CRÍTICA #3: Si el texto del usuario contiene solo ruido o palabras sueltas "
                     "sin una orden clara, no ejecutes ninguna acción."
                 ),
-                max_function_calls = 1
+                max_function_calls = 1,
+                verbose=True,
             )
             
             # Contexto efímero que morirá al finalizar esta función

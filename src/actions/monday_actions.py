@@ -29,8 +29,8 @@ def delete_item_tool(id_elemento: str) -> str:
     return asyncio.run(monday_svc.delete_item(id_elemento))
 
 monday_tools = [
-    FunctionTool.from_defaults(fn=crear_espacio_trabajo_tool),
-    FunctionTool.from_defaults(fn=crear_tablero_tool),
-    FunctionTool.from_defaults(fn=agregar_item_tool),
-    FunctionTool.from_defaults(fn=eliminar_item_tool)
+    FunctionTool.from_defaults(fn=create_worskpace_tool),
+    FunctionTool.from_defaults(fn=create_board_tool),
+    FunctionTool.from_defaults(fn=add_item_tool),
+    FunctionTool.from_defaults(fn=delete_item_tool)
 ]
