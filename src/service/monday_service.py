@@ -47,4 +47,14 @@ class MondayService:
         if 'error' in data: return f'No puede crear el espacio de trabajo. {data['error']}'
         return f'Escpacio de trabajo {data['create_workspace']['name']} creado con ID: {data['create_workspace']['id']}'
     
-    
+    async def agregar_item(self, board_id: str, item_name: str) -> str:
+        query = """
+        mutation ($boardId: ID!, $itemName: String!) {
+            create_item (board_id: $boardId, item_name: $itemName) {
+                id
+            }
+        }
+        """
+        data = await self._ejecutar_query(query, {"boardId": board_id, "itemName": item_name})
+        if "error" in data: return f"No pude agregar el elemento. {data['error']}"
+        return f"Elemento '{item_name}' agregado exitosamente al tablero."
