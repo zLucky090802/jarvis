@@ -12,7 +12,7 @@ class MondayService:
             'API-Version': '2026-07'
         }
     
-    async def _ejecutar_query(self, query: str, variables: Optional[Dict[str, any]]):
+    async def _execute_query(self, query: str, variables: Optional[Dict[str, any]]):
         """Metodo privado para centralizar las peticiones http a monday."""
         
         async with httpx.AsyncClient() as client:
@@ -32,4 +32,19 @@ class MondayService:
                 return {
                     'error': str(e)
                 }
+                
+    async def create_workspace(self, name:str) ->:
+        query = """
+        mutation ($name:String!){
+            create_workspace (name:$name, kind: open){
+                id
+                name
+            }
+        }
+        """
+        
+        data = await self._execute_query(query,{'name': name})
+        if 'error' in data: return f'No puede crear el espacio de trabajo. {data['error']}'
+        return f'Escpacio de trabajo {data['create_workspace']['name']} creado con ID: {data['create_workspace']['id']}'
+    
     
