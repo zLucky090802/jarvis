@@ -47,7 +47,7 @@ class MondayService:
         if 'error' in data: return f'No puede crear el espacio de trabajo. {data['error']}'
         return f'Escpacio de trabajo {data['create_workspace']['name']} creado con ID: {data['create_workspace']['id']}'
     
-    async def agregar_item(self, board_id: str, item_name: str) -> str:
+    async def add_item(self, board_id: str, item_name: str) -> str:
         query = """
         mutation ($boardId: ID!, $itemName: String!) {
             create_item (board_id: $boardId, item_name: $itemName) {
@@ -58,3 +58,15 @@ class MondayService:
         data = await self._ejecutar_query(query, {"boardId": board_id, "itemName": item_name})
         if "error" in data: return f"No pude agregar el elemento. {data['error']}"
         return f"Elemento '{item_name}' agregado exitosamente al tablero."
+    
+    async def delete_item(self, item_id: str) -> str:
+        query = """
+        mutation ($itemId: ID!) {
+            delete_item (item_id: $itemId) {
+                id
+            }
+        }
+        """
+        data = await self._ejecutar_query(query, {"itemId": item_id})
+        if "error" in data: return f"No pude eliminar el elemento. {data['error']}"
+        return f"Elemento con ID {item_id} eliminado correctamente."
