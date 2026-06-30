@@ -6,12 +6,14 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "fastapi>=0.136.3",
+    "groq>=1.5.0",
     "httpx>=0.28.1",
     "llama-index-core>=0.14.22",
     "llama-index-llms-groq>=0.5.0",
     "pyautogui>=0.9.54",
     "pygetwindow>=0.0.9",
     "python-dotenv>=1.2.2",
+    "python-multipart>=0.0.32",
     "scipy>=1.17.1",
     "sounddevice>=0.5.5",
 ]
