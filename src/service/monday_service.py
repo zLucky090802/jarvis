@@ -33,7 +33,7 @@ class MondayService:
                     'error': str(e)
                 }
                 
-    async def create_workspace(self, name:str) ->:
+    async def create_workspace(self, name:str) ->str:
         query = """
         mutation ($name:String!){
             create_workspace (name:$name, kind: open){
